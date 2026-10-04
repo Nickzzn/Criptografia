@@ -22,28 +22,10 @@ def gerar_codigo(caracteres, tamanho):
     return "".join(random.sample(caracteres, tamanho))
 
 
-def criptografar(mensagem, tamanho, embaralhar, multipla):
+def criptografar(mensagem, tamanho, embaralhar, multiplas_codificacoes):
     caracteres_unicode = obter_caracteres_unicode()
 
     tabela = {}
-
-    for caractere in set(mensagem):
-
-        if multipla:
-            quantidade = 3
-            codigos = []
-
-            for _ in range(quantidade):
-                codigos.append(
-                    gerar_codigo(caracteres_unicode, tamanho)
-                )
-
-            tabela[caractere] = codigos
-
-        else:
-            tabela[caractere] = [
-                gerar_codigo(caracteres_unicode, tamanho)
-            ]
 
     if embaralhar:
         lista = list(mensagem)
@@ -53,43 +35,48 @@ def criptografar(mensagem, tamanho, embaralhar, multipla):
     resultado = ""
 
     for caractere in mensagem:
-        opcoes = tabela[caractere]
+        if multiplas_codificacoes:
+            codigos = gerar_codigo(caracteres_unicode, tamanho)
 
-        codigo = random.choice(opcoes)
+        else:
+            if caractere in tabela:
+                codigos = tabela[caractere]
 
-        resultado += codigo
+            else: 
+                codigos = gerar_codigo(caracteres_unicode, tamanho)
+                tabela[caractere] = codigos
 
-    return resultado, tabela
+
+        resultado += codigos
+
+    return resultado
 
 
-def main():
+mensagem = input("Digite a mensagem: ")
 
-    mensagem = input("Digite a mensagem: ")
+tamanho = int(input("Qual o tamanho de cada codificação? "))
 
-    tamanho = int(input("Qual o tamanho de cada codificação? "))
+embaralhar = input("Deseja embaralhar a mensagem? (s/n): ").lower() 
 
-    embaralhar = input("Deseja embaralhar a mensagem? (s/n): ").lower() 
+if embaralhar == "s":
+    embaralhar = True
 
-    if embaralhar == "s":
-        embaralhar = True
+else:
+    embaralhar = False
 
-    else:
-        embaralhar = False
+multiplas_codificacoes = input("Deseja ativar múltiplas codificações? (s/n): ").lower()
 
-    multipla = input("Deseja ativar múltiplas codificações? (s/n): ").lower()
+if multiplas_codificacoes == "s":
+    multiplas_codificacoes = True
 
-    if multipla == "s":
-        multipla = True
+else:
+    multiplas_codificacoes = False
 
-    else:
-        multipla = False
+resultado = criptografar(mensagem, tamanho, embaralhar, multiplas_codificacoes)
 
-    resultado, tabela = criptografar(mensagem, tamanho, embaralhar, multipla)
+with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
+    arquivo.write(resultado)
 
-    with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
-        arquivo.write(resultado)
+print("\nMensagem criptografada!")
+print(os.path.abspath("mensagem_criptografada.txt"))
 
-    print("\nMensagem criptografada!")
-    print(os.path.abspath("mensagem_criptografada.txt"))
-
-main()
